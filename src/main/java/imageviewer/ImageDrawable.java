@@ -8,8 +8,8 @@ import java.io.IOException;
 public class ImageDrawable implements Drawable {
     private final String name;
     private final BufferedImage bufferedImage;
-    private final Drawable next;
-    private final Drawable prev;
+    private Drawable next;
+    private Drawable prev;
 
     public ImageDrawable(String name, Drawable next, Drawable prev) throws IOException {
         this.name = name;
@@ -51,5 +51,23 @@ public class ImageDrawable implements Drawable {
     @Override
     public Drawable prev() {
         return this.prev;
+    }
+
+    public void setNext(Drawable next) {
+        this.next = next;
+    }
+
+    public void setPrev(Drawable prev) {
+        this.prev = prev;
+    }
+
+    @Override
+    public String toString() {
+        return "ImageDrawable{" +
+                "name='" + name + '\'' +
+                ", bufferedImage=" + bufferedImage +
+                ", next=" + (next != null ? next.name() : "null") +
+                ", prev=" + (prev != null ? prev.name() : "null") +
+                '}';
     }
 }
