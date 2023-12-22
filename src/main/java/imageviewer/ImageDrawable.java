@@ -4,18 +4,32 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class ImageDrawable implements Drawable {
     private final String name;
     private final BufferedImage bufferedImage;
     private Drawable next;
     private Drawable prev;
+    private final int height;
+    private final int width;
 
     public ImageDrawable(String name, Drawable next, Drawable prev) throws IOException {
         this.name = name;
-        bufferedImage = ImageIO.read(new File(name));
+        this.bufferedImage = ImageIO.read(new File(name));
+        this.height = bufferedImage.getHeight();
+        this.width = bufferedImage.getWidth();
         this.next = next;
         this.prev = prev;
+    }
+
+    public ImageDrawable(String name, Drawable next, Drawable prev, int newHeight, int newWidth) throws IOException {
+        this.name = name;
+        this.bufferedImage = ImageIO.read(new File(name));
+        this.next = next;
+        this.prev = prev;
+        this.height = newHeight;
+        this.width = newWidth;
     }
 
     @Override
@@ -25,17 +39,30 @@ public class ImageDrawable implements Drawable {
 
     @Override
     public int height() {
-        return bufferedImage.getHeight();
+        return this.height;
     }
 
     @Override
     public int width() {
-        return bufferedImage.getWidth();
+        return this.width;
     }
 
     @Override
     public Drawable resize(int canvasHeight, int canvasWidth) {
-        return null;
+        try {
+            boolean imageIsGreaterThanCanvas = (height > canvasHeight) && (width > canvasWidth);
+            if(!imageIsGreaterThanCanvas && height > canvasHeight || (imageIsGreaterThanCanvas && (height > width))) {
+                int newWidth = (width * canvasHeight) / height;
+                return new ImageDrawable(name, next, prev, canvasHeight, newWidth);
+            }
+            else if(imageIsGreaterThanCanvas || width > canvasWidth) {
+                int newHeight = (height * canvasWidth) / width;
+                return new ImageDrawable(name, next, prev, newHeight, canvasWidth);
+            }
+            else return this;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -68,6 +95,21 @@ public class ImageDrawable implements Drawable {
                 ", bufferedImage=" + bufferedImage +
                 ", next=" + (next != null ? next.name() : "null") +
                 ", prev=" + (prev != null ? prev.name() : "null") +
+                ", drawableHeight=" + height +
+                ", drawableWidth=" + width +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ImageDrawable that = (ImageDrawable) o;
+        return height == that.height && width == that.width && Objects.equals(name, that.name) && Objects.equals(bufferedImage, that.bufferedImage) && Objects.equals(next, that.next) && Objects.equals(prev, that.prev);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, bufferedImage, next, prev, height, width);
     }
 }
