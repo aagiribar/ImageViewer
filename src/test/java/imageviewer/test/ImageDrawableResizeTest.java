@@ -6,12 +6,11 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static imageviewer.test.ImageDrawableTest.Cases.*;
+import static imageviewer.test.ImageDrawableResizeTest.Cases.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.withPrecision;
 
-public class ImageDrawableTest {
-
+public class ImageDrawableResizeTest {
 
     @Test
     void should_return_same_image_when_canvas_is_greater_than_image() {
@@ -152,9 +151,6 @@ public class ImageDrawableTest {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }
-
-        public Cases() throws IOException {
         }
     }
 }

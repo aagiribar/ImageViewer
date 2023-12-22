@@ -67,7 +67,12 @@ public class ImageDrawable implements Drawable {
 
     @Override
     public Point center(int canvasHeight, int canvasWidth) {
-        return null;
+        Point canvasCenter = getCanvasCenter(canvasHeight, canvasWidth);
+        return new Point(canvasCenter.x() - (width / 2), canvasCenter.y() - (height / 2));
+    }
+
+    private Point getCanvasCenter(int canvasHeight, int canvasWidth) {
+        return new Point(canvasWidth / 2, canvasHeight / 2);
     }
 
     @Override
