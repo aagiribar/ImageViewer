@@ -14,13 +14,18 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static java.lang.Math.abs;
 
 public class SwingImageDisplay extends JFrame implements ImageDisplay {
     private final Presenter presenter;
     private final List<Order> orders = new ArrayList<>();
     private int offset = 0;
-    private int lastX;
+    private int firstX;
+    private final Map<String, BufferedImage> imageCache = new HashMap<>();
 
     public SwingImageDisplay(Presenter presenter) throws HeadlessException {
         setTitle("Image Viewer");
@@ -37,10 +42,9 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
             @Override
             public void mouseDragged(MouseEvent e) {
                 int currentX = e.getX();
-                if (currentX < lastX) offset -= currentX;
-                else offset += currentX;
-                presenter.dragged(offset -> offset);
-                lastX = currentX;
+                offset = firstX - currentX;
+                if (abs(offset) > width()) offset = sing(offset) * width();
+                presenter.dragged(() -> offset);
             }
 
             @Override
@@ -52,11 +56,13 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
             public void mouseClicked(MouseEvent e) {}
 
             @Override
-            public void mousePressed(MouseEvent e) {}
+            public void mousePressed(MouseEvent e) {
+                firstX = e.getX();
+            }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                presenter.released(offset -> offset);
+                presenter.released(() -> offset);
                 offset = 0;
             }
 
@@ -68,18 +74,43 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
         });
     }
 
+    private int sing(int i) {
+        return i < 0 ? -1 : 1;
+    }
+
     @Override
     public void paint(Graphics g) {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
         for (Order order : orders) {
             try {
-                BufferedImage bufferedImage = ImageIO.read(new File(order.drawable.name()));
+                BufferedImage bufferedImage = getImageToDraw(order.drawable);
                 g.drawImage(bufferedImage, order.position.x(), order.position.y(), order.drawable.width(), order.drawable.height(), null);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private BufferedImage getImageToDraw(Drawable drawable) throws IOException {
+        if (!imageCache.containsKey(drawable.name())) {
+            imageCache.put(drawable.name(), ImageIO.read(new File(drawable.name())));
+        }
+        return imageCache.get(drawable.name());
+    }
+
+    private void clearImageCache() {
+        imageCache.clear();
+    }
+
+    @Override
+    public int height() {
+        return getHeight();
+    }
+
+    @Override
+    public int width() {
+        return getWidth();
     }
 
     @Override
