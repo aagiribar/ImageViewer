@@ -13,6 +13,7 @@ public class ImageDrawable implements Drawable {
     private Drawable prev;
     private final int height;
     private final int width;
+    private boolean resized;
 
     public ImageDrawable(String name, Drawable next, Drawable prev) throws IOException {
         this.name = name;
@@ -21,6 +22,7 @@ public class ImageDrawable implements Drawable {
         this.width = bufferedImage.getWidth();
         this.next = next;
         this.prev = prev;
+        this.resized = false;
     }
 
     public ImageDrawable(String name, Drawable next, Drawable prev, int newHeight, int newWidth) throws IOException {
@@ -30,6 +32,7 @@ public class ImageDrawable implements Drawable {
         this.prev = prev;
         this.height = newHeight;
         this.width = newWidth;
+        this.resized = true;
     }
 
     @Override
@@ -48,6 +51,11 @@ public class ImageDrawable implements Drawable {
     }
 
     @Override
+    public boolean resized() {
+        return this.resized;
+    }
+
+    @Override
     public Drawable resize(int canvasHeight, int canvasWidth) {
         try {
             boolean imageIsGreaterThanCanvas = (height > canvasHeight) && (width > canvasWidth);
@@ -59,7 +67,10 @@ public class ImageDrawable implements Drawable {
                 int newHeight = (height * canvasWidth) / width;
                 return new ImageDrawable(name, next, prev, newHeight, canvasWidth);
             }
-            else return this;
+            else {
+                this.resized = true;
+                return this;
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -8,4 +8,5 @@ public interface Presenter {
 
     void released(Released released);
     void dragged(Dragged dragged);
+    void windowStateChanged();
 }

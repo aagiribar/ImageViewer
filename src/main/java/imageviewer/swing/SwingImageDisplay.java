@@ -7,9 +7,7 @@ import imageviewer.Presenter;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -72,6 +70,15 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
             @Override
             public void mouseExited(MouseEvent e) {}
         });
+
+        addWindowStateListener(e -> presenter.windowStateChanged());
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                presenter.windowStateChanged();
+            }
+        });
+
     }
 
     private int sing(int i) {
@@ -120,14 +127,26 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
 
     @Override
     public void paint(Drawable drawable, Drawable.Point position) {
-        Drawable resizedImage = drawable.resize(getHeight(), getWidth());
+        Drawable resizedImage;
+        if(!drawable.resized()) {
+            resizedImage = drawable.resize(getHeight(), getWidth());
+        }
+        else {
+            resizedImage = drawable;
+        }
         orders.add(new Order(resizedImage, position));
         repaint();
     }
 
     @Override
     public void paintOnCenter(Drawable drawable) {
-        Drawable resizedImage = drawable.resize(getHeight(), getWidth());
+        Drawable resizedImage;
+        if(!drawable.resized()) {
+            resizedImage = drawable.resize(getHeight(), getWidth());
+        }
+        else {
+            resizedImage = drawable;
+        }
         orders.add(new Order(resizedImage, resizedImage.center(getHeight(), getWidth())));
         repaint();
     }

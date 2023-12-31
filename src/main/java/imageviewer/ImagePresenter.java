@@ -55,11 +55,18 @@ public class ImagePresenter implements Presenter {
             secondImage = currentImage.prev();
         }
 
+        if (secondImage == null) return;
         Drawable secondImageResized = secondImage.resize(display.height(), display.width());
         Drawable.Point secondImageCenter = secondImageResized.center(display.height(), display.width());
         display.paint(secondImageResized, new Drawable.Point(
                 getXPositionOf(offset, dragged.on(), secondImageResized.width()),
                 secondImageCenter.y()));
+    }
+
+    @Override
+    public void windowStateChanged() {
+        display.clear();
+        display.paintOnCenter(currentImage);
     }
 
     private int getXPositionOf(int offset, int draggedOn, int secondImageWidth) {
