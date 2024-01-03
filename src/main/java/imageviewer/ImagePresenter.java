@@ -3,19 +3,20 @@ package imageviewer;
 public class ImagePresenter implements Presenter {
     private ImageDisplay display;
     private Drawable currentImage;
+    private final DrawableLoader loader;
 
-    public ImagePresenter(Drawable image) {
-        this.currentImage = image;
+    public ImagePresenter(DrawableLoader loader) {
+        this.loader = loader;
     }
 
     @Override
     public void setDisplay(ImageDisplay display) {
         this.display = display;
-        display.paintOnCenter(currentImage);
     }
 
     @Override
     public void released(ImageDisplay.Released released) {
+        if (currentImage == null) return;
         int threshold = display.width() / 3;
         int offset = released.at();
 
@@ -30,6 +31,23 @@ public class ImagePresenter implements Presenter {
         display.paintOnCenter(currentImage);
     }
 
+    @Override
+    public void imageOpened(String filePath, String fileName) {
+        this.currentImage = searchImageByName(loader.load(filePath), fileName);
+
+        display.clear();
+        display.paintOnCenter(currentImage);
+    }
+
+    private Drawable searchImageByName(Drawable drawable, String fileName) {
+        Drawable current = drawable;
+        while (current != null) {
+            if (current.name().endsWith(fileName)) return current;
+            current = current.next();
+        }
+        return drawable;
+    }
+
     private Drawable getPrevImageOf(Drawable image) {
         return image.prev() != null ? image.prev(): image;
     }
@@ -42,6 +60,7 @@ public class ImagePresenter implements Presenter {
     public void dragged(ImageDisplay.Dragged dragged) {
         int offset = dragged.on();
 
+        if (currentImage == null) return;
         display.clear();
         Drawable currentImageResized = currentImage.resize(display.height(), display.width());
         Drawable.Point currentImageCenter = currentImageResized.center(display.height(), display.width());

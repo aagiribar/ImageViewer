@@ -1,5 +1,5 @@
 package imageviewer;
 
 public interface DrawableLoader {
-    Drawable load();
+    Drawable load(String dir);
 }

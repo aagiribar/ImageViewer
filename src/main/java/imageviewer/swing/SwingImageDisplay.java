@@ -24,15 +24,22 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
     private int offset = 0;
     private int firstX;
     private final Map<String, BufferedImage> imageCache = new HashMap<>();
+    private final JFileChooser fc;
 
     public SwingImageDisplay(Presenter presenter) throws HeadlessException {
         setTitle("Image Viewer");
         setSize(1400, 1000);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.fc = createFileChooser();
         this.presenter = presenter;
         addListeners();
         setVisible(true);
+    }
+
+    private JFileChooser createFileChooser() {
+        JFileChooser fc = new JFileChooser();
+        return fc;
     }
 
     private void addListeners() {
@@ -51,7 +58,14 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
 
         addMouseListener(new MouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {}
+            public void mouseClicked(MouseEvent e) {
+                int returnVal = fc.showOpenDialog(SwingImageDisplay.this);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fc.getSelectedFile();
+                    presenter.imageOpened(selectedFile.getParent(), selectedFile.getName());
+                }
+                clearImageCache();
+            }
 
             @Override
             public void mousePressed(MouseEvent e) {
@@ -71,7 +85,6 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
             public void mouseExited(MouseEvent e) {}
         });
 
-        addWindowStateListener(e -> presenter.windowStateChanged());
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -140,14 +153,16 @@ public class SwingImageDisplay extends JFrame implements ImageDisplay {
 
     @Override
     public void paintOnCenter(Drawable drawable) {
-        Drawable resizedImage;
-        if(!drawable.resized()) {
-            resizedImage = drawable.resize(getHeight(), getWidth());
+        if (drawable != null) {
+            Drawable resizedImage;
+            if(!drawable.resized()) {
+                resizedImage = drawable.resize(getHeight(), getWidth());
+            }
+            else {
+                resizedImage = drawable;
+            }
+            orders.add(new Order(resizedImage, resizedImage.center(getHeight(), getWidth())));
         }
-        else {
-            resizedImage = drawable;
-        }
-        orders.add(new Order(resizedImage, resizedImage.center(getHeight(), getWidth())));
         repaint();
     }
 

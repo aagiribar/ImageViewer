@@ -7,17 +7,15 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class FileDrawableLoader implements DrawableLoader {
-    private final File directory;
     private final String[] types;
 
-    public FileDrawableLoader(String dir, String[] types) {
-        this.directory = new File(dir);
+    public FileDrawableLoader(String[] types) {
         this.types = types;
     }
 
     @Override
-    public Drawable load() {
-        List<String> imagesPaths = imagesPathsIn(directory);
+    public Drawable load(String dir) {
+        List<String> imagesPaths = imagesPathsIn(new File(dir));
         Drawable first, prev = null, current;
         try {
             first = new ImageDrawable(imagesPaths.get(0), null, null);

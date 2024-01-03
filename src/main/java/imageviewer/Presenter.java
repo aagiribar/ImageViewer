@@ -9,4 +9,5 @@ public interface Presenter {
     void released(Released released);
     void dragged(Dragged dragged);
     void windowStateChanged();
+    void imageOpened(String filePath, String fileName);
 }
